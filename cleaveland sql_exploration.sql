@@ -50,22 +50,6 @@ GROUP BY action;
 -- ============================================================================
 
 -- 2.1: Categorize cancellations by lead time
---SELECT 
-    --CASE
-        --WHEN Action = 'NO_CALL_NO_SHOW' THEN 'NCNS'
-        --WHEN lead_time < 4 THEN 'Call-Off (<4hrs)'
-        --WHEN lead_time >= 4 AND lead_time < 24 THEN 'Late Cancel (4-24hrs)'
-        --WHEN lead_time >= 24 AND lead_time < 72 THEN 'Standard Cancel (24-72hrs)'
-        --ELSE 'Early Cancel (>72hrs)'
-    --END as cancel_cat,
-    --COUNT(*) as cancel_count,
-    --ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as pct_of_cancels,
-    --ROUND(AVG(lead_time), 2) as avg_lead_time
---FROM [Cancel_logs v1]
---GROUP BY Action
---ORDER BY cancel_count DESC;
-
--- Option 1: Using a subquery (most compatible)
 SELECT 
     cancel_cat,
     cancel_count,
@@ -95,24 +79,6 @@ FROM (
 ORDER BY cancel_count DESC;
 
 -- 2.2: Analyze cancellation distribution by lead time buckets
---SELECT 
-    --CASE 
-        --WHEN lead_time < 0 THEN 'NCNS (negative lead time)'
-        --WHEN lead_time < 2 THEN '0-2 hours'
-        --WHEN lead_time < 4 THEN '2-4 hours'
-        --WHEN lead_time < 8 THEN '4-8 hours'
-        --WHEN lead_time < 24 THEN '8-24 hours'
-        --WHEN lead_time < 48 THEN '24-48 hours'
-        --WHEN lead_time < 72 THEN '48-72 hours'
-        --ELSE '>72 hours'
-    --END as lead_time_bucket,
-    --COUNT(*) as cancellations,
-    --ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (), 2) as pct_of_total
---FROM [Cancel_logs v1]
---WHERE action = 'WORKER_CANCEL'
---GROUP BY lead_time_bucket
---ORDER BY MIN(lead_time);
-
 SELECT 
     CASE 
         WHEN lead_time < 0 THEN 'NCNS (negative lead time)'
@@ -155,33 +121,6 @@ GROUP BY c.action;
 -- ============================================================================
 -- PHASE 3: HCP BEHAVIOR ANALYSIS
 -- ============================================================================
-
--- 3.1: HCP cancellation frequency distribution
---WITH hcp_cancels AS (
-    --SELECT 
-        --worker_id,
-        --COUNT(*) as total_cancels,
-        --SUM(CASE WHEN action = 'NO_CALL_NO_SHOW' THEN 1 ELSE 0 END) as ncns_count,
-        --SUM(CASE WHEN lead_time < 4 THEN 1 ELSE 0 END) as calloff_count,
-        --SUM(CASE WHEN lead_time >= 4 AND lead_time < 24 THEN 1 ELSE 0 END) as late_cancel_count
-    --FROM [Cancel_logs v1]
-    --GROUP BY worker_id
---)
---SELECT 
-    --CASE 
-        --WHEN total_cancels = 1 THEN '1 cancel'
-        --WHEN total_cancels = 2 THEN '2 cancels'
-        --WHEN total_cancels BETWEEN 3 AND 5 THEN '3-5 cancels'
-        --WHEN total_cancels BETWEEN 6 AND 10 THEN '6-10 cancels'
-        --ELSE '>10 cancels'
-    --END as cancel_frequency,
-    --COUNT(*) as num_hcps,
-    --SUM(total_cancels) as total_cancels_from_group,
-    --ROUND(SUM(total_cancels) * 100.0 / (SELECT SUM(total_cancels) FROM hcp_cancels), 2) as pct_of_all_cancels
---FROM hcp_cancels
---GROUP BY cancel_frequency
---ORDER BY MIN(total_cancels);
-
 WITH hcp_cancels AS (
     SELECT 
         worker_id,
